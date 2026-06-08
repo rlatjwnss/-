@@ -3,352 +3,238 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI TTS 음성 변환기</title>
+  <title>AI 따뜻한 말벗 & 복지 상담소</title>
   <style>
     * { box-sizing: border-box; }
-
     body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #e3f2fd, #fce4ec);
-      font-family: Arial, sans-serif;
-      color: #333;
+      margin: 0; min-height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      background: linear-gradient(135deg, #e3f2fd, #e8f5e9);
+      font-family: 'Malgun Gothic', sans-serif;
     }
-
-    .container {
-      width: min(900px, 92%);
-      margin: 40px auto;
+    .app-container {
+      width: 400px; max-width: 90%; height: 600px;
+      padding: 24px; border-radius: 24px;
       background: #ffffff;
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.16);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.18);
+      display: flex; flex-direction: column;
     }
-
     h1 {
-      margin: 0 0 8px;
-      text-align: center;
-      font-size: 28px;
+      margin: 0 0 16px; text-align: center; font-size: 22px; color: #2e7d32;
     }
-
-    .subtitle {
-      text-align: center;
-      color: #777;
-      margin-bottom: 24px;
-      font-size: 14px;
+    /* 로그인 화면 */
+    #login-screen {
+      display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;
     }
-
-    .info {
-      padding: 14px;
-      margin-bottom: 20px;
-      border-radius: 14px;
-      background: #e8f5e9;
-      color: #2e7d32;
-      font-size: 14px;
-      line-height: 1.6;
+    .login-btn {
+      padding: 12px 24px; font-size: 18px; border: none; border-radius: 14px;
+      background: #4285f4; color: white; cursor: pointer; transition: 0.2s;
     }
-
-    .option-box {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
+    .login-btn:hover { background: #3367d6; }
+    
+    /* 메인 채팅 화면 */
+    #chat-screen {
+      display: none; flex-direction: column; height: 100%;
     }
-
-    select, input {
-      height: 44px;
-      padding: 0 12px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      font-size: 14px;
-      outline: none;
+    .chat-box {
+      flex: 1; overflow-y: auto; background: #f4f6f8; border-radius: 14px;
+      padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;
     }
-
-    textarea {
-      width: 100%;
-      min-height: 180px;
-      resize: vertical;
-      padding: 16px;
-      border: 1px solid #ddd;
-      border-radius: 16px;
-      font-size: 16px;
-      line-height: 1.5;
-      outline: none;
-      font-family: Arial, sans-serif;
+    .message {
+      padding: 12px 16px; border-radius: 14px; font-size: 16px; line-height: 1.4; max-width: 80%;
     }
-
-    textarea:focus, select:focus, input:focus {
-      border-color: #42a5f5;
-      box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.15);
+    .msg-user {
+      background: #c8e6c9; align-self: flex-end; color: #1b5e20;
     }
-
-    .label {
-      font-weight: bold;
-      margin-bottom: 6px;
+    .msg-ai {
+      background: #ffffff; align-self: flex-start; color: #333; border: 1px solid #ddd;
     }
-
-    .button-row {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      margin-top: 14px;
+    .input-area {
+      display: flex; gap: 10px;
     }
-
-    button, .download-link {
-      border: none;
-      border-radius: 12px;
-      padding: 0 18px;
-      height: 46px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.15s;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    #user-input {
+      flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 14px;
+      font-size: 16px; outline: none;
     }
-
-    button:hover, .download-link:hover {
-      transform: translateY(-2px);
-      opacity: 0.9;
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-      transform: none;
-    }
-
-    .make-btn {
-      background: #42a5f5;
-      color: white;
-    }
-
-    .clear-btn {
-      background: #b0bec5;
-      color: white;
-    }
-
-    .download-link {
-      background: #7e57c2;
-      color: white;
-    }
-
-    .hidden { display: none; }
-
-    .status {
-      min-height: 24px;
-      margin-top: 14px;
-      color: #555;
-      font-size: 14px;
-    }
-
-    .result-box {
-      margin-top: 20px;
-      padding: 18px;
-      border-radius: 18px;
-      background: #f7f9fb;
-      border: 1px solid #edf1f5;
-    }
-
-    audio {
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .help {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #777;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 700px) {
-      .option-box { grid-template-columns: 1fr; }
-      .button-row { justify-content: stretch; }
-      button, .download-link { width: 100%; }
+    .send-btn {
+      padding: 0 20px; border: none; border-radius: 14px;
+      background: #2e7d32; color: white; font-size: 16px; cursor: pointer; font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>AI TTS 음성 변환기</h1>
-    <div class="subtitle">텍스트를 AI 음성 mp3 파일로 변환합니다</div>
+  <div class="app-container">
+    <h1>🌱 따뜻한 AI 말벗</h1>
 
-    <div class="info">
-      현재 구조: GitHub Pages 화면 → Google Apps Script 서버 → OpenAI TTS API → mp3 음성 반환<br />
-      API Key는 index.html에 들어가지 않고 Apps Script의 스크립트 속성에 저장됩니다.
+    <div id="login-screen">
+      <p style="text-align:center; color:#555; margin-bottom: 20px;">
+        어르신들의 든든한 친구이자<br>맞춤형 복지 안내원입니다.
+      </p>
+      <button class="login-btn" id="loginBtn">구글 계정으로 시작하기</button>
     </div>
 
-    <div class="option-box">
-      <select id="modelSelect">
-        <option value="tts-1">tts-1 빠른 생성</option>
-        <option value="tts-1-hd">tts-1-hd 고품질</option>
-      </select>
-
-      <select id="voiceSelect">
-        <option value="alloy">alloy</option>
-        <option value="echo">echo</option>
-        <option value="fable">fable</option>
-        <option value="onyx">onyx</option>
-        <option value="nova">nova</option>
-        <option value="shimmer">shimmer</option>
-      </select>
-
-      <input id="speedInput" type="number" min="0.25" max="4.0" step="0.05" value="1.0" placeholder="속도" />
-    </div>
-
-    <div>
-      <div class="label">변환할 텍스트</div>
-      <textarea id="textInput" placeholder="음성으로 바꿀 문장을 입력하세요. 예: 안녕하세요. 오늘은 Firebase와 OpenAI API를 활용한 웹페이지 제작을 배워보겠습니다."></textarea>
-    </div>
-
-    <div class="button-row">
-      <button class="clear-btn" id="clearBtn">초기화</button>
-      <button class="make-btn" id="makeBtn">음성 만들기</button>
-    </div>
-
-    <div id="status" class="status"></div>
-
-    <div id="resultBox" class="result-box hidden">
-      <div class="label">생성된 음성</div>
-      <audio id="audioPlayer" controls></audio>
-      <div class="button-row">
-        <a id="downloadLink" class="download-link" href="#" download="tts-audio.mp3">mp3 다운로드</a>
+    <div id="chat-screen">
+      <div class="chat-box" id="chatBox">
+        <div class="message msg-ai">안녕하세요! 오늘 하루는 어떠셨나요? 복지 혜택에 대해 궁금한 점이 있으시다면 편하게 말씀해주세요.</div>
       </div>
-    </div>
-
-    <div class="help">
-      긴 문장은 생성 시간이 오래 걸릴 수 있습니다. 처음에는 짧은 문장으로 테스트해보세요.<br />
-      속도는 0.25부터 4.0까지 조절할 수 있습니다.
+      <div class="input-area">
+        <input type="text" id="user-input" placeholder="여기에 말씀해 주세요..." />
+        <button class="send-btn" id="sendBtn">전송</button>
+      </div>
     </div>
   </div>
 
-  <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzvCeCidpIBm3Ez_AbmzTRrvzCkPa_7x-irAazDPzljPmuqjjHZOqXxfyS1vNh7tX1/exec';
+  <script type="module">
+    // 1. Firebase SDK 임포트
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    const textInput = document.getElementById('textInput');
-    const modelSelect = document.getElementById('modelSelect');
-    const voiceSelect = document.getElementById('voiceSelect');
-    const speedInput = document.getElementById('speedInput');
-    const makeBtn = document.getElementById('makeBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const statusBox = document.getElementById('status');
-    const resultBox = document.getElementById('resultBox');
-    const audioPlayer = document.getElementById('audioPlayer');
-    const downloadLink = document.getElementById('downloadLink');
+    // [주의] 본인의 Firebase 설정 객체로 교체하세요!
+    const firebaseConfig = {
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-    makeBtn.addEventListener('click', makeSpeech);
-    clearBtn.addEventListener('click', clearPage);
+    // [주의] 본인의 생성형 AI (예: OpenAI) API 키로 교체하세요!
+    const AI_API_KEY = "YOUR_OPENAI_API_KEY"; 
 
-    textInput.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' && event.ctrlKey) {
-        makeSpeech();
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    // DOM 요소
+    const loginScreen = document.getElementById('login-screen');
+    const chatScreen = document.getElementById('chat-screen');
+    const loginBtn = document.getElementById('loginBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const userInput = document.getElementById('user-input');
+    const chatBox = document.getElementById('chatBox');
+
+    let currentUser = null;
+
+    // 2. Firebase Authentication (로그인)
+    loginBtn.addEventListener('click', () => {
+      signInWithPopup(auth, provider).catch(error => {
+        console.error("로그인 에러:", error);
+        alert("로그인에 실패했습니다.");
+      });
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        loginScreen.style.display = 'none';
+        chatScreen.style.display = 'flex';
+      } else {
+        currentUser = null;
+        loginScreen.style.display = 'flex';
+        chatScreen.style.display = 'none';
       }
     });
 
-    async function makeSpeech() {
-      const text = textInput.value.trim();
-      const model = modelSelect.value;
-      const voice = voiceSelect.value;
-      const speed = Number(speedInput.value || 1.0);
+    // 3. 메세지 전송 및 AI 연동
+    sendBtn.addEventListener('click', async () => {
+      const text = userInput.value.trim();
+      if (!text) return;
 
-      if (!text) {
-        alert('음성으로 변환할 텍스트를 입력해주세요.');
-        return;
+      appendMessage(text, 'user');
+      userInput.value = '';
+
+      // Firebase Firestore에 사용자 질문 저장 (데이터 연동)
+      if (currentUser) {
+        try {
+          await addDoc(collection(db, "chats"), {
+            uid: currentUser.uid,
+            message: text,
+            sender: 'user',
+            timestamp: serverTimestamp()
+          });
+        } catch (e) {
+          console.error("DB 저장 에러:", e);
+        }
       }
 
-      if (speed < 0.25 || speed > 4.0) {
-        alert('속도는 0.25부터 4.0 사이로 입력해주세요.');
-        return;
-      }
-
+      // 생성형 AI API 호출 (OpenAI 예시)
+      // 실제 서비스 시에는 클라이언트에서 API 키를 직접 호출하기보다 백엔드를 거치는 것이 안전합니다.
       try {
-        setLoading(true);
-        resultBox.classList.add('hidden');
-        statusBox.textContent = 'Apps Script 서버에 TTS 요청을 보내는 중입니다.';
-
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${AI_API_KEY}`
+          },
           body: JSON.stringify({
-            type: 'tts',
-            text: text,
-            model: model,
-            voice: voice,
-            speed: speed
+            model: "gpt-3.5-turbo",
+            messages: [
+              { role: "system", content: "당신은 따뜻하고 친절한 사회복지사 및 노인 심리 상담사입니다. 노인분들이 이해하기 쉽도록 친절하고, 너무 길지 않게 답변해주세요." },
+              { role: "user", content: text }
+            ]
           })
         });
 
+        if(!response.ok) throw new Error("API 요청 실패");
+        
         const data = await response.json();
+        const aiText = data.choices[0].message.content;
 
-        if (data.error) {
-          throw new Error(data.error);
+        appendMessage(aiText, 'ai');
+        playTTS(aiText); // 4. TTS 기능 실행
+
+        // AI 답변 DB 저장
+        if (currentUser) {
+          await addDoc(collection(db, "chats"), {
+            uid: currentUser.uid,
+            message: aiText,
+            sender: 'ai',
+            timestamp: serverTimestamp()
+          });
         }
 
-        if (!data.audioBase64) {
-          throw new Error('음성 데이터를 받지 못했습니다.');
-        }
-
-        const audioUrl = base64ToAudioUrl(data.audioBase64, 'audio/mpeg');
-
-        audioPlayer.src = audioUrl;
-        downloadLink.href = audioUrl;
-        downloadLink.download = makeFileName();
-        resultBox.classList.remove('hidden');
-        statusBox.textContent = '음성 생성 완료';
       } catch (error) {
         console.error(error);
-        statusBox.textContent = '요청 실패';
-        alert('오류가 발생했습니다.\n\n' + error.message);
-      } finally {
-        setLoading(false);
+        const errorMsg = "죄송합니다. 현재 AI 서버와 연결할 수 없습니다.";
+        appendMessage(errorMsg, 'ai');
+        playTTS(errorMsg);
       }
+    });
+
+    // 엔터키로 전송
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+
+    // 화면에 메세지 추가 함수
+    function appendMessage(text, sender) {
+      const div = document.createElement('div');
+      div.classList.add('message', sender === 'user' ? 'msg-user' : 'msg-ai');
+      div.innerText = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function base64ToAudioUrl(base64, mimeType) {
-      const byteCharacters = atob(base64);
-      const byteArrays = [];
-
-      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-        const slice = byteCharacters.slice(offset, offset + 512);
-        const byteNumbers = new Array(slice.length);
-
-        for (let i = 0; i < slice.length; i++) {
-          byteNumbers[i] = slice.charCodeAt(i);
-        }
-
-        const byteArray = new Uint8Array(byteNumbers);
-        byteArrays.push(byteArray);
+    // 5. TTS (Text-to-Speech) 기능
+    function playTTS(text) {
+      if (!window.speechSynthesis) {
+        console.warn("이 브라우저는 TTS를 지원하지 않습니다.");
+        return;
       }
-
-      const blob = new Blob(byteArrays, { type: mimeType });
-      return URL.createObjectURL(blob);
-    }
-
-    function makeFileName() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hour = String(now.getHours()).padStart(2, '0');
-      const minute = String(now.getMinutes()).padStart(2, '0');
-      return `tts-${year}${month}${day}-${hour}${minute}.mp3`;
-    }
-
-    function setLoading(isLoading) {
-      makeBtn.disabled = isLoading;
-      makeBtn.textContent = isLoading ? '생성 중...' : '음성 만들기';
-    }
-
-    function clearPage() {
-      textInput.value = '';
-      statusBox.textContent = '';
-      audioPlayer.removeAttribute('src');
-      downloadLink.href = '#';
-      resultBox.classList.add('hidden');
+      // 실행 중인 음성이 있다면 취소
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 0.9; // 어르신을 위해 조금 천천히 읽기
+      utterance.pitch = 1.0;
+      
+      window.speechSynthesis.speak(utterance);
     }
   </script>
 </body>
 </html>
-
