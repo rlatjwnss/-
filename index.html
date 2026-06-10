@@ -3,126 +3,478 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 응급처치 도우미</title>
+  <title>우리집 구급상자 스마트 대시보드</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      margin: 0; min-height: 100vh;
-      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-      font-family: 'Malgun Gothic', sans-serif; color: #333;
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e0f2f1, #fce4ec);
+      font-family: Arial, sans-serif;
+      color: #333;
     }
+
     .container {
-      width: min(900px, 92%); margin: 40px auto;
-      background: #fff; border-radius: 20px;
-      padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    h1 { text-align: center; color: #d32f2f; margin-bottom: 5px; }
-    .subtitle { text-align: center; color: #555; margin-bottom: 20px; font-size: 15px; }
-    
-    .warning-notice {
-      background: #ffebee; border-left: 5px solid #d32f2f; color: #c62828;
-      padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 30px; line-height: 1.5;
+      width: min(900px, 92%);
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     }
 
-    /* 공통 폼 스타일 */
-    input, textarea {
-      padding: 14px; border: 1px solid #ccc; border-radius: 10px;
-      font-size: 15px; outline: none; width: 100%; font-family: inherit;
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: 28px;
+      color: #00796b;
     }
-    input:focus, textarea:focus { border-color: #1976d2; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1); }
+
+    h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #004d40;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    /* 상단 탭 메뉴 스타일 */
+    .tab-menu {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      border-bottom: 2px solid #edf1f5;
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #f1f3f5;
+      color: #555;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.15s;
+      height: auto;
+    }
+
+    .tab-btn:hover {
+      background: #e2e6ea;
+      transform: none;
+      opacity: 1;
+    }
+
+    .tab-btn.active {
+      background: #009688;
+      color: white;
+    }
+
+    /* 공통 요소 스타일 */
+    input, select {
+      height: 46px;
+      padding: 0 14px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      resize: vertical;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      font-size: 16px;
+      line-height: 1.5;
+      outline: none;
+      font-family: Arial, sans-serif;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #009688;
+      box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.15);
+    }
+
     button {
-      border: none; border-radius: 10px; padding: 14px 20px;
-      font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s;
+      border: none;
+      border-radius: 12px;
+      padding: 0 16px;
+      height: 46px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.15s;
+      font-weight: bold;
     }
-    button:hover { opacity: 0.9; transform: translateY(-2px); }
-    button:disabled { background: #bdbdbd; cursor: not-allowed; transform: none; }
-    
-    /* 섹션별 스타일 */
-    .hidden { display: none !important; }
-    .auth-box { max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-    .btn-login { background: #1976d2; color: white; }
-    .btn-signup { background: #ffb300; color: #333; }
-    
-    .top-bar { display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    .btn-logout { background: #757575; color: white; padding: 8px 15px; }
-    
-    .ai-section { background: #e3f2fd; padding: 24px; border-radius: 15px; margin-bottom: 24px; border: 1px solid #90caf9; }
-    .ai-controls { display: flex; gap: 10px; margin-bottom: 15px; }
-    .btn-ask { background: #d32f2f; color: white; white-space: nowrap; width: 140px; }
-    .ai-response { background: white; padding: 20px; border-radius: 10px; min-height: 100px; margin-bottom: 15px; white-space: pre-wrap; line-height: 1.6; border: 1px solid #e0e0e0; }
-    .btn-tts { background: #2e7d32; color: white; width: 100%; font-size: 16px; }
 
-    .db-section { background: #f5f5f5; padding: 24px; border-radius: 15px; border: 1px solid #e0e0e0; }
-    .db-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-    .btn-save { background: #1976d2; color: white; }
+    button:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none;
+    }
+
+    /* 기능별 알림/공지 스타일 */
+    .notice, .info {
+      padding: 14px;
+      margin-bottom: 20px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .notice {
+      max-width: 620px;
+      margin: 20px auto 0;
+      background: #fff8e1;
+      color: #6d4c41;
+    }
+
+    .info {
+      background: #e0f2f1;
+      color: #004d40;
+    }
+
+    .label {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .status {
+      min-height: 24px;
+      margin: 14px 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .help {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #777;
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* 1번 기능: Firebase 데이터 관리 */
+    .auth-box {
+      max-width: 420px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .login-btn { background: #009688; color: white; }
+    .signup-btn { background: #00796b; color: white; }
+    .logout-btn { background: #455a64; color: white; }
+    .add-btn { background: #009688; color: white; }
+    .refresh-btn { background: #4caf50; color: white; margin-bottom: 16px; }
+    .edit-btn { background: #ffca28; color: #333; }
+    .delete-btn { background: #ef5350; color: white; }
+    .save-btn { background: #00796b; color: white; }
+    .cancel-btn { background: #b0bec5; color: white; }
+
+    .form-box {
+      display: grid;
+      grid-template-columns: 1fr 2fr auto;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #f7f9fb;
+    }
+
+    .user-info {
+      font-size: 14px;
+      color: #555;
+      word-break: break-all;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px;
+      border-radius: 16px;
+      background: #f7f9fb;
+      border: 1px solid #edf1f5;
+    }
+
+    .item-title { margin: 0 0 6px; font-size: 18px; font-weight: bold; color: #004d40; }
+    .item-content { margin: 0; color: #555; line-height: 1.5; word-break: break-all; }
+    .item-date { margin-top: 8px; font-size: 12px; color: #999; }
+    .item-actions { display: flex; gap: 8px; }
+    .edit-box { display: grid; grid-template-columns: 1fr 2fr auto auto; gap: 8px; width: 100%; }
+    .empty { text-align: center; padding: 30px; color: #888; background: #f7f9fb; border-radius: 16px; }
+
+    /* 2번 기능: ChatGPT 질문 답변 */
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .ask-btn { background: #009688; color: white; }
+    .clear-btn { background: #b0bec5; color: white; }
+
+    .answer-box {
+      min-height: 220px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #f7f9fb;
+      border: 1px solid #edf1f5;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* 3번 기능: AI TTS 음성 변환기 */
+    .option-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .make-btn { background: #009688; color: white; }
     
-    .note-list { display: flex; flex-direction: column; gap: 12px; }
-    .note-item { background: white; padding: 18px; border-radius: 10px; border: 1px solid #ddd; display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .note-content h3 { margin: 0 0 8px; color: #1565c0; font-size: 17px; }
-    .note-content p { margin: 0; font-size: 14px; color: #444; line-height: 1.5; white-space: pre-wrap; }
-    .btn-delete { background: #d32f2f; color: white; padding: 8px 14px; font-size: 13px; border-radius: 8px; }
-    
-    @media (max-width: 600px) {
-      .ai-controls { flex-direction: column; }
-      .btn-ask { width: 100%; }
+    .download-link {
+      background: #00796b;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0 18px;
+      height: 46px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.15s;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .download-link:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .result-box {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #f7f9fb;
+      border: 1px solid #edf1f5;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* 반응형 레이아웃 조정 */
+    @media (max-width: 700px) {
+      .form-box, .item, .edit-box, .top-bar, .option-box {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .item-actions, .button-row {
+        justify-content: stretch;
+      }
+      button, .download-link {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🚑 AI 응급처치 도우미</h1>
-    <div class="subtitle">다친 부위를 말하면 AI가 적절한 대처법을 알려주고, 내 치료 기록을 관리합니다.</div>
+    <h1>우리집 구급상자</h1>
+    <div class="subtitle">상비약 재고 관리 및 AI 의약품 가이드 시스템</div>
 
-    <div class="warning-notice">
-      <strong>🚨 주의사항:</strong> 본 AI의 안내는 참고용 응급처치 정보입니다. 심한 출혈, 골절 의심, 호흡 곤란 등 심각한 상황일 경우 <strong>즉시 119에 신고하거나 응급실을 방문</strong>하세요.
+    <div class="tab-menu">
+      <button class="tab-btn active" onclick="openTab(event, 'firebase-section')">상비약 재고 관리</button>
+      <button class="tab-btn" onclick="openTab(event, 'chatgpt-section')">AI 복약 상담실</button>
+      <button class="tab-btn" onclick="openTab(event, 'tts-section')">AI 복약 안내 음성 안내</button>
     </div>
 
-    <div id="authSection" class="auth-box">
-      <input id="emailInput" type="email" placeholder="이메일 (예: user@firstaid.com)" />
-      <input id="pwInput" type="password" placeholder="비밀번호 6자리 이상" />
-      <button id="loginBtn" class="btn-login">로그인</button>
-      <button id="signupBtn" class="btn-signup">새로 가입하기</button>
+    <div id="firebase-section" class="tab-content">
+      <section id="authSection">
+        <div class="auth-box">
+          <h2>가족 계정 로그인</h2>
+          <input id="emailInput" type="email" placeholder="이메일 주소" />
+          <input id="passwordInput" type="password" placeholder="비밀번호 (6자리 이상)" />
+          <button class="login-btn" id="loginBtn">로그인</button>
+          <button class="signup-btn" id="signupBtn">가족 계정 만들기</button>
+        </div>
+        <div class="notice">
+          구급상자를 공동 관리할 가족 계정을 생성하거나 로그인해 주세요.<br />
+          등록된 상비약 정보는 우리 가족 계정에 실시간 동기화되어 저장됩니다.
+        </div>
+      </section>
+
+      <section id="mainSection" class="hidden">
+        <div class="top-bar">
+          <div class="user-info">
+            관리자 계정: <strong id="userEmail"></strong>
+          </div>
+          <button class="logout-btn" id="logoutBtn">로그아웃</button>
+        </div>
+        <div class="form-box">
+          <input id="titleInput" type="text" placeholder="약 이름 (예: 타이레놀 500mg)" />
+          <input id="contentInput" type="text" placeholder="수량 및 유통기한 (예: 5정 남음, 유통기한 27.12.31)" />
+          <button class="add-btn" id="addBtn">약 등록</button>
+        </div>
+        <button class="refresh-btn" id="refreshBtn">목록 새로고침</button>
+        <div id="firebaseStatus" class="status"></div>
+        <div id="dataList" class="list"></div>
+      </section>
     </div>
 
-    <div id="mainSection" class="hidden">
-      <div class="top-bar">
-        <span>환영합니다! <strong><span id="userEmail"></span></strong>님</span>
-        <button id="logoutBtn" class="btn-logout">로그아웃</button>
+    <div id="chatgpt-section" class="tab-content hidden">
+      <div class="info">
+        <strong>💡 AI 복약 상담 주의사항</strong><br />
+        본 상담은 OpenAI AI 모델의 데이터 기반 안내이며, 전문적인 의사의 진단이나 약사의 조언을 대신할 수 없습니다. 증상이 심할 경우 반드시 병원을 방문하세요.
       </div>
-
-      <div class="ai-section">
-        <h2 style="margin-top: 0; color: #1565c0;">🩺 어디를, 어떻게 다치셨나요?</h2>
-        <div class="ai-controls">
-          <input id="questionInput" type="text" placeholder="예: 요리하다가 칼에 손가락을 살짝 베였어요. 피가 나요." />
-          <button id="askBtn" class="btn-ask">처치법 묻기</button>
+      <div class="chat-box">
+        <div>
+          <div class="label">의약품 또는 증상 문의</div>
+          <textarea id="questionInput" placeholder="궁금한 의약품 정보나 가벼운 증상을 입력하세요.&#13;예: 타이레놀과 부루펜은 교차 복용해도 되나요?&#13;예: 가벼운 화상을 입었을 때 구급상자에서 어떤 약을 찾아 발라야 하나요?"></textarea>
         </div>
-        <div id="aiResponse" class="ai-response">증상을 입력하고 버튼을 누르면 AI 구조사가 대처법을 안내해 드립니다.</div>
-        <button id="ttsBtn" class="btn-tts hidden">🔊 음성으로 안내 듣기 (TTS)</button>
+        <div class="button-row">
+          <button class="clear-btn" id="chatgptClearBtn">초기화</button>
+          <button class="ask-btn" id="chatgptAskBtn">상담하기</button>
+        </div>
+        <div id="chatgptStatus" class="status"></div>
+        <div>
+          <div class="label">AI 가이드 답변</div>
+          <div id="answerBox" class="answer-box">궁금한 점을 입력하고 상담하기를 눌러주세요.</div>
+        </div>
+        <div class="help">
+          단축키: 질문 입력창에서 Ctrl + Enter를 누르면 질문이 전송됩니다.<br />
+          오류가 발생하면 Apps Script 배포 권한이 “모든 사용자”인지 확인하세요.
+        </div>
       </div>
+    </div>
 
-      <div class="db-section">
-        <h2 style="margin-top: 0; color: #424242;">📂 내 부상 및 치료 기록 저장</h2>
-        <div class="db-form">
-          <input id="noteTitle" type="text" placeholder="기록 제목 (예: 24년 6월 손가락 베임)" />
-          <textarea id="noteContent" rows="4" placeholder="AI가 알려준 처치법이나, 이후 병원 방문 결과 등을 메모해 두세요."></textarea>
-          <button id="saveBtn" class="btn-save">데이터베이스에 기록 저장하기</button>
+    <div id="tts-section" class="tab-content hidden">
+      <div class="info">
+        어르신이나 아이들을 위한 복약 안내문을 깨끗한 AI 음성 파일(MP3)로 변환하는 공간입니다.
+      </div>
+      <div class="option-box">
+        <select id="modelSelect">
+          <option value="tts-1">tts-1 빠른 생성</option>
+          <option value="tts-1-hd">tts-1-hd 고품질</option>
+        </select>
+        <select id="voiceSelect">
+          <option value="alloy">alloy (기본)</option>
+          <option value="echo">echo</option>
+          <option value="fable">fable</option>
+          <option value="onyx">onyx (남성향)</option>
+          <option value="nova">nova (여성향)</option>
+          <option value="shimmer">shimmer</option>
+        </select>
+        <input id="speedInput" type="number" min="0.25" max="4.0" step="0.05" value="1.0" placeholder="속도" />
+      </div>
+      <div>
+        <div class="label">음성으로 변환할 복약 안내 텍스트</div>
+        <textarea id="ttsTextInput" placeholder="음성 안내로 만들 문장을 입력하세요.&#13;예: 할머니, 빨간색 스티커가 붙은 물약은 하루에 세 번, 식사하신 후에 한 숟가락씩 드셔야 합니다. 절대로 빈속에 드시면 안 됩니다."></textarea>
+      </div>
+      <div class="button-row">
+        <button class="clear-btn" id="ttsClearBtn">초기화</button>
+        <button class="make-btn" id="ttsMakeBtn">안내 음성 만들기</button>
+      </div>
+      <div id="ttsStatus" class="status"></div>
+      <div id="ttsResultBox" class="result-box hidden">
+        <div class="label">생성된 안내 음성</div>
+        <audio id="audioPlayer" controls></audio>
+        <div class="button-row" style="margin-top: 10px;">
+          <a id="downloadLink" class="download-link" href="#" download="medication-guide.mp3">MP3 다운로드</a>
         </div>
-        
-        <h3 style="color: #424242;">📋 이전 치료 기록 목록</h3>
-        <div id="noteList" class="note-list"></div>
+      </div>
+      <div class="help">
+        텍스트가 길어질수록 음성 생성에 시간이 걸릴 수 있습니다.<br />
+        속도는 어르신들이 듣기 편하도록 0.8 ~ 0.9 정도로 느리게 조절하는 것을 추천합니다.
       </div>
     </div>
   </div>
 
   <script type="module">
-    // Firebase 라이브러리 불러오기
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import { getDatabase, ref, push, set, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+    // --- 공통 기능: 탭 전환 활성화 설정 ---
+    window.openTab = function(evt, sectionId) {
+      const contents = document.querySelectorAll('.tab-content');
+      contents.forEach(content => content.classList.add('hidden'));
 
-    // 🚨 새롭게 제공해주신 OpenAI API 키 적용 완료
-    const OPENAI_API_KEY = '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';
-    
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      document.getElementById(sectionId).classList.remove('hidden');
+      evt.currentTarget.classList.add('active');
+    };
+
+    // --- 1번 기능: Firebase 모듈 가져오기 및 설정 ---
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import {
+      getDatabase,
+      ref,
+      push,
+      set,
+      update,
+      remove,
+      onValue,
+      off
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
     const firebaseConfig = {
       apiKey: "AIzaSyDG0mCIRagrO1vMeHjD3o2070KJ2zjwZtw",
       authDomain: "test-3cb15.firebaseapp.com",
@@ -130,147 +482,441 @@
       projectId: "test-3cb15",
       storageBucket: "test-3cb15.firebasestorage.app",
       messagingSenderId: "754947524586",
-      appId: "1:754947524586:web:28bc76b444a9e60020d493"
+      appId: "1:754947524586:web:28bc76b444a9e60020d493",
+      measurementId: "G-SZQDCGTLGY"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app);
+    const database = getDatabase(app);
+
+    const authSection = document.getElementById('authSection');
+    const mainSection = document.getElementById('mainSection');
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const signupBtn = document.getElementById('signupBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userEmail = document.getElementById('userEmail');
+    const titleInput = document.getElementById('titleInput');
+    const contentInput = document.getElementById('contentInput');
+    const addBtn = document.getElementById('addBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const dataList = document.getElementById('dataList');
+    const firebaseStatusBox = document.getElementById('firebaseStatus');
 
     let currentUser = null;
+    let currentItemsRef = null;
 
-    // --- DOM 요소 ---
-    const authSection = document.getElementById('authSection'), mainSection = document.getElementById('mainSection');
-    const emailInput = document.getElementById('emailInput'), pwInput = document.getElementById('pwInput');
-    const loginBtn = document.getElementById('loginBtn'), signupBtn = document.getElementById('signupBtn'), logoutBtn = document.getElementById('logoutBtn');
-    
-    const questionInput = document.getElementById('questionInput');
-    const askBtn = document.getElementById('askBtn'), aiResponse = document.getElementById('aiResponse'), ttsBtn = document.getElementById('ttsBtn');
-    
-    const noteTitle = document.getElementById('noteTitle'), noteContent = document.getElementById('noteContent');
-    const saveBtn = document.getElementById('saveBtn'), noteList = document.getElementById('noteList');
+    function setFirebaseStatus(message) {
+      firebaseStatusBox.textContent = message;
+    }
 
-    // --- 1. 로그인/회원가입 ---
-    signupBtn.onclick = () => createUserWithEmailAndPassword(auth, emailInput.value, pwInput.value).then(() => alert("가입이 완료되었습니다!")).catch(e => alert(e.message));
-    loginBtn.onclick = () => signInWithEmailAndPassword(auth, emailInput.value, pwInput.value).catch(e => alert("로그인 실패: 정보를 확인해주세요."));
-    logoutBtn.onclick = () => signOut(auth);
+    function getEmailAndPassword() {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      if (!email || !password) {
+        alert('이메일과 비밀번호를 모두 입력해주세요.');
+        return null;
+      }
+      if (password.length < 6) {
+        alert('비밀번호는 6자리 이상이어야 합니다.');
+        return null;
+      }
+      return { email, password };
+    }
 
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('userEmail').innerText = user.email;
-        authSection.classList.add('hidden');
-        mainSection.classList.remove('hidden');
-        loadNotes();
-      } else {
-        currentUser = null;
-        authSection.classList.remove('hidden');
-        mainSection.classList.add('hidden');
+    signupBtn.addEventListener('click', async () => {
+      const account = getEmailAndPassword();
+      if (!account) return;
+      try {
+        await createUserWithEmailAndPassword(auth, account.email, account.password);
+        alert('가족 계정 생성이 완료되었습니다.');
+      } catch (error) {
+        alert(getKoreanErrorMessage(error.code));
       }
     });
 
-    // --- 2. 생성형 AI 연동 ---
-    askBtn.onclick = async () => {
-      const question = questionInput.value.trim();
-      if (!question) return alert("어디를 다치셨는지 증상을 입력해주세요!");
-
-      askBtn.disabled = true; askBtn.innerText = "분석 중...";
-      aiResponse.innerText = "상황을 파악하고 안전한 응급처치법을 찾고 있습니다. 잠시만 기다려주세요...";
-      ttsBtn.classList.add('hidden');
-
-      // AI의 역할과 성격을 부여하는 프롬프트 (전문적, 침착함, 경고 포함)
-      const systemPrompt = `당신은 침착하고 전문적인 AI 응급구조사입니다. 사용자가 다친 부위와 상황을 말하면, 집에서 할 수 있는 안전하고 정확한 응급처치 방법을 이해하기 쉽게 1, 2, 3 단계별로 안내해 주세요. 단, 증상이 심각할 수 있는 경우 반드시 즉시 병원에 가거나 119에 신고하라는 경고를 포함해야 합니다.`;
-
+    loginBtn.addEventListener('click', async () => {
+      const account = getEmailAndPassword();
+      if (!account) return;
       try {
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${OPENAI_API_KEY}` },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "system", content: systemPrompt }, { role: "user", content: question }]
-          })
-        });
-        const data = await res.json();
-        const answer = data.choices[0].message.content;
-        
-        aiResponse.innerText = answer;
-        ttsBtn.classList.remove('hidden'); 
-        
-        // 메모장에 자동 세팅
-        noteTitle.value = `[부상 기록] ${question}`;
-        noteContent.value = `[AI 권장 처치법]\n${answer}`;
-      } catch (err) {
-        aiResponse.innerText = "통신 중 오류가 발생했습니다. 위급 상황일 경우 119에 바로 연락하세요.";
-      } finally {
-        askBtn.disabled = false; askBtn.innerText = "처치법 묻기";
+        await signInWithEmailAndPassword(auth, account.email, account.password);
+      } catch (error) {
+        alert(getKoreanErrorMessage(error.code));
       }
-    };
+    });
 
-    // --- 3. Web Speech API (TTS) ---
-    ttsBtn.onclick = () => {
-      const text = aiResponse.innerText;
-      if (!text || !window.speechSynthesis) return;
-      
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ko-KR';
-      utterance.rate = 1.0; // 명확하고 또렷하게 들리도록 기본 속도 유지
-      
-      window.speechSynthesis.speak(utterance);
-    };
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        alert('로그아웃에 실패했습니다.');
+      }
+    });
 
-    // --- 4. Firebase DB (기록 저장 및 조회) ---
-    saveBtn.onclick = () => {
-      if (!noteTitle.value || !noteContent.value) return alert("제목과 내용을 모두 입력하세요.");
-      const dbRef = ref(db, `medical_notes/${currentUser.uid}`);
-      push(dbRef, {
-        title: noteTitle.value,
-        content: noteContent.value,
-        date: new Date().toLocaleString('ko-KR')
-      }).then(() => {
-        noteTitle.value = ""; noteContent.value = "";
-        alert("치료 기록이 안전하게 저장되었습니다.");
-      });
-    };
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        showMainPage(user);
+        startRealtimeDataListener(user.uid);
+      } else {
+        currentUser = null;
+        showAuthPage();
+        stopRealtimeDataListener();
+      }
+    });
 
-    function loadNotes() {
-      const dbRef = ref(db, `medical_notes/${currentUser.uid}`);
-      onValue(dbRef, snapshot => {
-        noteList.innerHTML = '';
+    function showMainPage(user) {
+      authSection.classList.add('hidden');
+      mainSection.classList.remove('hidden');
+      userEmail.textContent = user.email;
+      emailInput.value = '';
+      passwordInput.value = '';
+    }
+
+    function showAuthPage() {
+      authSection.classList.remove('hidden');
+      mainSection.classList.add('hidden');
+      userEmail.textContent = '';
+      dataList.innerHTML = '';
+    }
+
+    function startRealtimeDataListener(uid) {
+      stopRealtimeDataListener();
+      setFirebaseStatus('구급상자 목록을 불러오는 중입니다...');
+      currentItemsRef = ref(database, `users/${uid}/items`);
+      onValue(currentItemsRef, (snapshot) => {
         const data = snapshot.val();
-        if (!data) {
-          noteList.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">저장된 기록이 없습니다.</p>';
-          return;
-        }
-        // 최신순으로 정렬
-        Object.keys(data).reverse().forEach(key => {
-          const note = data[key];
-          const div = document.createElement('div');
-          div.className = 'note-item';
-          div.innerHTML = `
-            <div class="note-content">
-              <h3>${note.title}</h3>
-              <p>${note.content}</p>
-              <small style="color:#888; display:block; margin-top:10px;">저장일시: ${note.date}</small>
-            </div>
-            <button class="btn-delete" data-key="${key}">삭제</button>
-          `;
-          noteList.appendChild(div);
-        });
-
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-          btn.onclick = (e) => {
-            const key = e.target.getAttribute('data-key');
-            if(confirm("이 기록을 삭제하시겠습니까?")) remove(ref(db, `medical_notes/${currentUser.uid}/${key}`));
-          };
-        });
+        renderData(data);
+        setFirebaseStatus('약품 목록이 실시간으로 동기화되었습니다.');
+      }, (error) => {
+        console.error(error);
+        setFirebaseStatus('데이터를 불러오지 못했습니다. Firebase 규칙을 점검하세요.');
       });
     }
 
-    // 엔터키 지원
-    questionInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') askBtn.click();
+    function stopRealtimeDataListener() {
+      if (currentItemsRef) {
+        off(currentItemsRef);
+        currentItemsRef = null;
+      }
+    }
+
+    addBtn.addEventListener('click', addData);
+    refreshBtn.addEventListener('click', () => {
+      if (currentUser) {
+        startRealtimeDataListener(currentUser.uid);
+      }
     });
+
+    async function addData() {
+      if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+      if (!title || !content) {
+        alert('의약품 이름과 수량/유통기한을 모두 입력해주세요.');
+        return;
+      }
+      try {
+        const itemsRef = ref(database, `users/${currentUser.uid}/items`);
+        const newItemRef = push(itemsRef);
+        await set(newItemRef, {
+          title,
+          content,
+          createdAt: new Date().toLocaleString('ko-KR'),
+          updatedAt: ''
+        });
+        titleInput.value = '';
+        contentInput.value = '';
+      } catch (error) {
+        console.error(error);
+        alert('의약품 등록에 실패했습니다.');
+      }
+    }
+
+    window.deleteData = async function(id) {
+      if (!currentUser) return;
+      const isConfirmed = confirm('정말 삭제하시겠습니까?');
+      if (!isConfirmed) return;
+      try {
+        await remove(ref(database, `users/${currentUser.uid}/items/${id}`));
+      } catch (error) {
+        console.error(error);
+        alert('데이터 삭제에 실패했습니다.');
+      }
+    };
+
+    window.updateData = async function(id) {
+      if (!currentUser) return;
+      const editTitle = document.getElementById(`edit-title-${id}`).value.trim();
+      const editContent = document.getElementById(`edit-content-${id}`).value.trim();
+      if (!editTitle || !editContent) {
+        alert('수정할 내용들을 모두 입력해주세요.');
+        return;
+      }
+      try {
+        await update(ref(database, `users/${currentUser.uid}/items/${id}`), {
+          title: editTitle,
+          content: editContent,
+          updatedAt: new Date().toLocaleString('ko-KR')
+        });
+      } catch (error) {
+        console.error(error);
+        alert('목록 수정에 실패했습니다.');
+      }
+    };
+
+    function renderData(data) {
+      dataList.innerHTML = '';
+      if (!data) {
+        dataList.innerHTML = '<div class="empty">구급상자가 비어있습니다. 상비약을 등록해보세요!</div>';
+        return;
+      }
+      const entries = Object.entries(data).reverse();
+      entries.forEach(([id, item]) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.id = `item-${id}`;
+        div.innerHTML = `
+          <div>
+            <p class="item-title">${escapeHTML(item.title || '')}</p>
+            <p class="item-content">${escapeHTML(item.content || '')}</p>
+            <div class="item-date">
+              등록일: ${item.createdAt || '-'}
+              ${item.updatedAt ? ` / 수정일: ${item.updatedAt}` : ''}
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('${id}', '${escapeForAttribute(item.title || '')}', '${escapeForAttribute(item.content || '')}')">수정</button>
+            <button class="delete-btn" onclick="deleteData('${id}')">삭제</button>
+          </div>
+        `;
+        dataList.appendChild(div);
+      });
+    }
+
+    window.showEditForm = function(id, title, content) {
+      const itemBox = document.getElementById(`item-${id}`);
+      itemBox.innerHTML = `
+        <div class="edit-box">
+          <input id="edit-title-${id}" type="text" value="${title}" />
+          <input id="edit-content-${id}" type="text" value="${content}" />
+          <button class="save-btn" onclick="updateData('${id}')">저장</button>
+          <button class="cancel-btn" onclick="location.reload();">취소</button>
+        </div>
+      `;
+    };
+
+    function escapeHTML(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function escapeForAttribute(text) {
+      return escapeHTML(text).replaceAll('`', '&#096;');
+    }
+
+    function getKoreanErrorMessage(code) {
+      switch (code) {
+        case 'auth/email-already-in-use': return '이미 가입된 이메일입니다.';
+        case 'auth/invalid-email': return '이메일 형식이 올바르지 않습니다.';
+        case 'auth/weak-password': return '비밀번호가 너무 약합니다. 6자리 이상으로 입력해주세요.';
+        case 'auth/user-not-found': return '가입되지 않은 이메일입니다.';
+        case 'auth/wrong-password': return '비밀번호가 올바르지 않습니다.';
+        case 'auth/invalid-credential': return '이메일 또는 비밀번호가 올바르지 않습니다.';
+        case 'auth/network-request-failed': return '네트워크 연결을 확인해주세요.';
+        default: return `오류가 발생했습니다: ${code}`;
+      }
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key !== 'Enter') return;
+      const activeId = document.activeElement.id;
+      if (activeId === 'emailInput' || activeId === 'passwordInput') { loginBtn.click(); }
+      if (activeId === 'titleInput' || activeId === 'contentInput') { addBtn.click(); }
+    });
+
+
+    // --- 2번 기능: ChatGPT 질문 답변 스크립트 ---
+    // ⚠️ 중요: 아래 URL에 본인의 Google Apps Script 배포 웹 앱 URL을 넣으세요.
+    const APPS_SCRIPT_URL_CHAT = 'https://script.google.com/macros/s/AKfycbyf8nly3-gNNAosYhC6tzjVegqqpkmv-iStIdr9tGMIPTuYVB4b8SV0gI1v1fbvxloG/exec';
+
+    const questionInput = document.getElementById('questionInput');
+    const answerBox = document.getElementById('answerBox');
+    const chatgptStatusBox = document.getElementById('chatgptStatus');
+    const chatgptAskBtn = document.getElementById('chatgptAskBtn');
+    const chatgptClearBtn = document.getElementById('chatgptClearBtn');
+
+    chatgptAskBtn.addEventListener('click', askChatGPT);
+    chatgptClearBtn.addEventListener('click', clearChatPage);
+
+    questionInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && event.ctrlKey) {
+        askChatGPT();
+      }
+    });
+
+    async function askChatGPT() {
+      const question = questionInput.value.trim();
+      if (!question) {
+        alert('의약품 또는 증상 관련 문의를 입력해주세요.');
+        return;
+      }
+      try {
+        setChatLoading(true);
+        answerBox.textContent = '가이드 답변을 생성하는 중입니다...';
+        chatgptStatusBox.textContent = 'Apps Script 서버에 요청을 보내는 중입니다.';
+
+        const response = await fetch(APPS_SCRIPT_URL_CHAT, {
+          method: 'POST',
+          body: JSON.stringify({ question: question })
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+
+        answerBox.textContent = data.answer || '답변을 가져오지 못했습니다.';
+        chatgptStatusBox.textContent = '상담 완료';
+      } catch (error) {
+        console.error(error);
+        answerBox.textContent = '오류가 발생했습니다.\n\n' + error.message;
+        chatgptStatusBox.textContent = '요청 실패';
+      } finally {
+        setChatLoading(false);
+      }
+    }
+
+    function setChatLoading(isLoading) {
+      chatgptAskBtn.disabled = isLoading;
+      chatgptAskBtn.textContent = isLoading ? '상담 중...' : '상담하기';
+    }
+
+    function clearChatPage() {
+      questionInput.value = '';
+      answerBox.textContent = '궁금한 점을 입력하고 상담하기를 눌러주세요.';
+      chatgptStatusBox.textContent = '';
+    }
+
+
+    // --- 3번 기능: AI TTS 음성 변환기 스크립트 ---
+    // ⚠️ 중요: 아래 URL에 본인의 Google Apps Script 배포 웹 앱 URL을 넣으세요. (위 URL과 동일한 URL입니다)
+    const APPS_SCRIPT_URL_TTS = 'https://script.google.com/macros/s/AKfycbyTS-n6dNxhXGHxck-BL97z9l2PPrqZbl0tqjtPIP44MVFtyOiTwizk4jva8GMuV38p/exec';
+
+    const ttsTextInput = document.getElementById('ttsTextInput');
+    const modelSelect = document.getElementById('modelSelect');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const speedInput = document.getElementById('speedInput');
+    const ttsMakeBtn = document.getElementById('ttsMakeBtn');
+    const ttsClearBtn = document.getElementById('ttsClearBtn');
+    const ttsStatusBox = document.getElementById('ttsStatus');
+    const ttsResultBox = document.getElementById('ttsResultBox');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const downloadLink = document.getElementById('downloadLink');
+
+    ttsMakeBtn.addEventListener('click', makeSpeech);
+    ttsClearBtn.addEventListener('click', clearTtsPage);
+
+    ttsTextInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && event.ctrlKey) {
+        makeSpeech();
+      }
+    });
+
+    async function makeSpeech() {
+      const text = ttsTextInput.value.trim();
+      const model = modelSelect.value;
+      const voice = voiceSelect.value;
+      const speed = Number(speedInput.value || 1.0);
+
+      if (!text) {
+        alert('음성으로 변환할 안내 텍스트를 입력해주세요.');
+        return;
+      }
+      if (speed < 0.25 || speed > 4.0) {
+        alert('속도는 0.25부터 4.0 사이로 입력해주세요.');
+        return;
+      }
+
+      try {
+        setTtsLoading(true);
+        ttsResultBox.classList.add('hidden');
+        ttsStatusBox.textContent = 'Apps Script 서버에 안내 음성 생성을 요청하는 중입니다.';
+
+        const response = await fetch(APPS_SCRIPT_URL_TTS, {
+          method: 'POST',
+          body: JSON.stringify({
+            type: 'tts',
+            text: text,
+            model: model,
+            voice: voice,
+            speed: speed
+          })
+        });
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        if (!data.audioBase64) throw new Error('음성 데이터를 받지 못했습니다.');
+
+        const audioUrl = base64ToAudioUrl(data.audioBase64, 'audio/mpeg');
+        audioPlayer.src = audioUrl;
+        downloadLink.href = audioUrl;
+        downloadLink.download = makeFileName();
+        ttsResultBox.classList.remove('hidden');
+        ttsStatusBox.textContent = '안내 음성 생성 완료';
+      } catch (error) {
+        console.error(error);
+        ttsStatusBox.textContent = '요청 실패';
+        alert('오류가 발생했습니다.\n\n' + error.message);
+      } finally {
+        setTtsLoading(false);
+      }
+    }
+
+    function base64ToAudioUrl(base64, mimeType) {
+      const byteCharacters = atob(base64);
+      const byteArrays = [];
+      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+      const blob = new Blob(byteArrays, { type: mimeType });
+      return URL.createObjectURL(blob);
+    }
+
+    function makeFileName() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hour = String(now.getHours()).padStart(2, '0');
+      const minute = String(now.getMinutes()).padStart(2, '0');
+      return `medication-guide-${year}${month}${day}.mp3`;
+    }
+
+    function setTtsLoading(isLoading) {
+      ttsMakeBtn.disabled = isLoading;
+      ttsMakeBtn.textContent = isLoading ? '생성 중...' : '안내 음성 만들기';
+    }
+
+    function clearTtsPage() {
+      ttsTextInput.value = '';
+      ttsStatusBox.textContent = '';
+      audioPlayer.removeAttribute('src');
+      downloadLink.href = '#';
+      ttsResultBox.classList.add('hidden');
+    }
   </script>
 </body>
 </html>
