@@ -232,15 +232,16 @@
     document.getElementById('refreshBtn').addEventListener('click', () => startRealtimeDataListener(currentUser.uid));
     
     // ChatGPT Q&A UI
-    const CHAT_API_URL = 'https://script.google.com/macros/s/AKfycbwmC_qqzBnd2hoPWNRShDVCzNxFkkcrQSZqZh6RngtrklqchFxVe1H3Hir_EaFW2PXY/exec';
+    const CHAT_API_URL = 'https://script.google.com/macros/s/AKfycbzeOHuu9jxLV-dVZVPmOwOLEc4hWBONZSUh_SRQjQibdcVSuUx_D1bhKySlMnBWNkIU/exec';
     document.getElementById('chatAskBtn').addEventListener('click', askChat);
     document.getElementById('chatClearBtn').addEventListener('click', () => {
       document.getElementById('chatInput').value = '';
       document.getElementById('chatAnswerBox').textContent = '아직 답변이 없습니다.';
+      document.getElementById('chatStatus').textContent = '';
     });
 
     // TTS UI
-    const TTS_API_URL = 'https://script.google.com/macros/s/AKfycbwmC_qqzBnd2hoPWNRShDVCzNxFkkcrQSZqZh6RngtrklqchFxVe1H3Hir_EaFW2PXY/exec';
+    const TTS_API_URL = 'https://script.google.com/macros/s/AKfycbzeOHuu9jxLV-dVZVPmOwOLEc4hWBONZSUh_SRQjQibdcVSuUx_D1bhKySlMnBWNkIU/exec';
     document.getElementById('ttsMakeBtn').addEventListener('click', makeTts);
 
 
@@ -318,7 +319,7 @@
       });
     }
 
-    // [5] ChatGPT 질문 답변 로직
+    // [5] ChatGPT 질문 답변 로직 (에러 감지 및 예외 처리 강화)
     async function askChat() {
       const input = document.getElementById('chatInput');
       const answerBox = document.getElementById('chatAnswerBox');
@@ -330,21 +331,34 @@
       btn.disabled = true;
       btn.textContent = '답변 생성 중...';
       answerBox.textContent = '인공지능이 답변을 작성하고 있습니다... ⏳';
-      statusBox.textContent = '';
+      statusBox.textContent = '서버에 요청을 보내는 중입니다.';
 
       try {
-        const res = await fetch(CHAT_API_URL, { method: 'POST', body: JSON.stringify({ question: input.value }) });
+        const res = await fetch(CHAT_API_URL, { 
+          method: 'POST', 
+          body: JSON.stringify({ question: input.value }) 
+        });
+        
         const data = await res.json();
-        answerBox.textContent = data.answer || '답변을 받지 못했습니다.';
+        
+        // 서버 측에서 자체 에러 객체를 실어 보냈는지 판단
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        answerBox.textContent = data.answer || '답변을 가져오지 못했습니다.';
+        statusBox.textContent = '답변 생성 완료';
       } catch (err) {
-        answerBox.textContent = '오류 발생: ' + err.message;
+        console.error('Chat API 오류:', err);
+        answerBox.textContent = '오류가 발생했습니다.\n\n' + err.message;
+        statusBox.textContent = '요청 실패';
       } finally {
         btn.disabled = false;
         btn.textContent = '질문하기';
       }
     }
 
-    // [6] TTS 안내 방송 로직
+    // [6] TTS 안내 방송 로직 (에러 표시 로직 강화)
     async function makeTts() {
       const text = document.getElementById('ttsInput').value.trim();
       const model = document.getElementById('ttsModel').value;
@@ -367,7 +381,9 @@
           body: JSON.stringify({ type: 'tts', text, model, voice, speed }) 
         });
         const data = await res.json();
+        
         if (data.error) throw new Error(data.error);
+        if (!data.audioBase64) throw new Error('음성 데이터를 받지 못했습니다.');
 
         // Base64 -> Audio Blob URL 변환
         const byteChars = atob(data.audioBase64);
@@ -385,7 +401,9 @@
         resultBox.classList.remove('hidden');
         statusBox.textContent = '음성 파일이 준비되었습니다!';
       } catch (err) {
-        statusBox.textContent = '오류 발생: ' + err.message;
+        console.error('TTS API 오류:', err);
+        statusBox.textContent = '요청 실패';
+        alert('오류가 발생했습니다.\n\n' + err.message);
       } finally {
         btn.disabled = false;
         btn.textContent = '음성 파일 만들기';
