@@ -219,6 +219,51 @@
       margin-top: 12px;
     }
 
+    /* 대화창 전용 스타일 추가 */
+    .chat-container {
+      max-height: 400px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      background: #fcfbfa;
+      border: 1px solid #eaddd5;
+      border-radius: 18px;
+    }
+
+    .chat-bubble {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 15px;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .chat-bubble.user {
+      align-self: flex-end;
+      background-color: #8d6e63;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-bubble.ai {
+      align-self: flex-start;
+      background-color: #f1f0ea;
+      color: #3e2723;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #e0dcd5;
+    }
+
+    .chat-bubble.system {
+      align-self: center;
+      background-color: transparent;
+      color: #a1887f;
+      font-size: 13px;
+      font-style: italic;
+    }
+
     .status {
       min-height: 20px;
       margin: 10px 0;
@@ -288,7 +333,7 @@
     <section id="mainSection" class="hidden">
       <div class="top-bar">
         <div class="user-info">
-          접속 계정: <strong id="userEmail"></strong> (사회복지 담당자)
+           접속 계정: <strong id="userEmail"></strong> (사회복지 담당자)
         </div>
         <button class="cancel-btn" id="logoutBtn">로그아웃</button>
       </div>
@@ -315,21 +360,25 @@
 
       <div id="tab-chat" class="tab-content hidden">
         <div class="info-banner">
-          <strong>[AI 정서지원 말벗 상담]</strong> 고독감이나 우울감을 호소하는 독거노인 또는 정서 지원 대상자에게 전할 따뜻한 위로의 문장이나 공감적 반응을 생성하는 AI 어시스턴트입니다.
+          <strong>[AI 정서지원 말벗 상담]</strong> 요즘 마음이 답답하거나 힘든 일이 있으시다면 편안하게 이야기해 주세요. 인공지능 말벗이 따뜻한 위로와 공감의 마음으로 귀를 기울입니다.
         </div>
+        
         <div class="form-group">
-          <div class="label">내담자의 발화 내용 또는 상황 입력</div>
-          <textarea id="questionInput" rows="4" placeholder="상황 예시: 최근 밤에 잠이 잘 안 오고 외롭다고 하시는 80대 어르신께 정서적 안정과 위로를 드릴 수 있는 공감 멘트 3가지를 제안해줘."></textarea>
+          <div class="label">마음 이음 대화창</div>
+          <div id="answerBox" class="chat-container">
+            <div class="chat-bubble system">마음속에 담아둔 힘든 이야기가 있다면 편하게 털어놓아 보세요...</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label">내가 하고 싶은 말 입력</div>
+          <textarea id="questionInput" rows="3" placeholder="예시: 요즘 밤에 잠도 잘 안 오고 문득문득 외롭다는 생각이 많이 드네..."></textarea>
         </div>
         <div class="button-row">
-          <button class="cancel-btn" id="clearChatBtn">내용 비우기</button>
-          <button class="primary-btn" id="askBtn">위로 반응 생성하기</button>
+          <button class="cancel-btn" id="clearChatBtn">대화 기록 비우기</button>
+          <button class="primary-btn" id="askBtn">이야기 나누기</button>
         </div>
         <div id="chatStatus" class="status"></div>
-        <div class="form-group">
-          <div class="label">AI 추천 반응 및 상담 가이드</div>
-          <div id="answerBox" class="display-box">아직 생성된 답변이 없습니다. 상황을 입력 후 버튼을 눌러주세요.</div>
-        </div>
       </div>
 
       <div id="tab-tts" class="tab-content hidden">
@@ -362,7 +411,7 @@
         </div>
         <div class="form-group">
           <div class="label">라디오 방송/낭독 내용 텍스트 입력</div>
-          <textarea id="textInput" rows="4" placeholder="어르신, 오늘도 찾아와주셔서 감사해요. 날씨가 부쩍 쌀쌀해졌는데 따뜻한 물 한 잔 드시고 오늘 밤은 부디 평안하고 포근하게 주무시길 바랄게요."></textarea>
+          <textarea id="textInput" rows="4" placeholder="어르신, 오늘도 찾아와주셔서 감사해요. 날씨가 부쩍 쌀깝해졌는데 따뜻한 물 한 잔 드시고 오늘 밤은 부디 평안하고 포근하게 주무시길 바랄게요."></textarea>
         </div>
         <div class="button-row">
           <button class="cancel-btn" id="clearTtsBtn">초기화</button>
@@ -413,7 +462,7 @@
       measurementId: "G-SZQDCGTLGY"
     };
 
-    // Google Apps Script 프록시 URL (보안 유지용)
+    // Google Apps Script 프록시 URL
     const CHAT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxC7S8p8Vi4iYRemjbZAVlfRga0mLE4HjcwAYP_wrkFOkocfkeMOHIooNn6ney1cYKAkA/exec';
     const TTS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxC7S8p8Vi4iYRemjbZAVlfRga0mLE4HjcwAYP_wrkFOkocfkeMOHIooNn6ney1cYKAkA/exec';
 
@@ -658,43 +707,71 @@
       `;
     };
 
-    // --- [TAB 2] ChatGPT 정서 지원 AI 상담 영역 ---
+    // --- [TAB 2] 대화식 정서 지원 AI 상담 영역 (수정됨) ---
     askBtn.addEventListener('click', async () => {
       const question = questionInput.value.trim();
       if (!question) {
-        alert('어르신 상황 또는 질문을 채워주세요.');
+        alert('이야기하고 싶은 힘든 점이나 고민을 작성해 주세요.');
         return;
       }
 
+      // 1. 시스템 안내 문구가 처음에 있다면 제거
+      const initialSystemMsg = answerBox.querySelector('.chat-bubble.system');
+      if (initialSystemMsg) {
+        initialSystemMsg.remove();
+      }
+
+      // 2. 사용자가 입력한 메시지를 대화창에 말풍선 형태로 추가
+      const userBubble = document.createElement('div');
+      userBubble.className = 'chat-bubble user';
+      userBubble.textContent = question;
+      answerBox.appendChild(userBubble);
+      
+      // 대화창 아래로 스크롤
+      answerBox.scrollTop = answerBox.scrollHeight;
+
+      // 3. 백엔드 전송용 시스템 프롬프트 합성 (정서 상담 성격 부여)
+      // Apps Script 구조가 {question: "내용"}만 받을 확률이 높으므로, 질문 내용에 따뜻한 대답 유도 멘트를 함께 결합하여 전송합니다.
+      const promptContext = `[정서지원 말벗 모드] 사용자가 본인의 힘든 상황이나 심경을 털어놓았습니다. 사회복지사 및 심리상담사의 마인드로 깊이 공감하고 위로해주는 따뜻한 대답을 해주세요. 답변은 어르신이나 내담자가 편하게 읽을 수 있도록 친절하고 따뜻한 구어체로 작성해주세요. \n\n내담자 이야기: ${question}`;
+
       try {
         askBtn.disabled = true;
-        askBtn.textContent = 'AI 멘트 생성 중...';
-        answerBox.textContent = '인공지능이 정서지원 상담 가이드를 디자인하고 있습니다...';
-        chatStatus.textContent = '📡 Apps Script 프록시 통신 중...';
+        askBtn.textContent = '마음으로 듣는 중...';
+        chatStatus.textContent = '📡 공감의 문장을 생각하고 있습니다...';
 
         const response = await fetch(CHAT_SCRIPT_URL, {
           method: 'POST',
-          body: JSON.stringify({ question: question })
+          body: JSON.stringify({ question: promptContext })
         });
         const data = await response.json();
 
         if (data.error) throw new Error(data.error);
 
-        answerBox.textContent = data.answer || '답변 수신 실패';
-        chatStatus.textContent = '✨ 맞춤 상담 공감 멘트 디자인 완료';
+        // 4. AI 답변을 대화창에 말풍선 형태로 추가
+        const aiBubble = document.createElement('div');
+        aiBubble.className = 'chat-bubble ai';
+        aiBubble.textContent = data.answer || '잠시 마음을 가다듬고 있나 봐요. 다시 이야기해 주실래요?';
+        answerBox.appendChild(aiBubble);
+
+        chatStatus.textContent = '✨ 마음 이음 완료';
+        questionInput.value = ''; // 대화 후 입력창 초기화
       } catch (error) {
         console.error(error);
-        answerBox.textContent = '오류 발생:\n' + error.message;
-        chatStatus.textContent = '⚠️ 생성 실패';
+        const errorBubble = document.createElement('div');
+        errorBubble.className = 'chat-bubble system';
+        errorBubble.textContent = '⚠️ 네트워크 연결 문제로 대화를 잠시 나누지 못했습니다. 다시 시도해 주세요.';
+        answerBox.appendChild(errorBubble);
+        chatStatus.textContent = '⚠️ 전송 실패';
       } finally {
         askBtn.disabled = false;
-        askBtn.textContent = '위로 반응 생성하기';
+        askBtn.textContent = '이야기 나누기';
+        answerBox.scrollTop = answerBox.scrollHeight; // 최종 스크롤 아래로
       }
     });
 
     clearChatBtn.addEventListener('click', () => {
+      answerBox.innerHTML = '<div class="chat-bubble system">마음속에 담아둔 힘든 이야기가 있다면 편하게 털어놓아 보세요...</div>';
       questionInput.value = '';
-      answerBox.textContent = '아직 생성된 답변이 없습니다. 상황을 입력 후 버튼을 눌러주세요.';
       chatStatus.textContent = '';
     });
 
@@ -806,6 +883,12 @@
       const activeId = document.activeElement.id;
       if (activeId === 'emailInput' || activeId === 'passwordInput') loginBtn.click();
       if (activeId === 'titleInput' || activeId === 'contentInput') addBtn.click();
+      
+      // 대화창 입력란에서 Shift+Enter가 아닌 그냥 Enter를 치면 전송 버튼 작동
+      if (activeId === 'questionInput' && !event.shiftKey) {
+        event.preventDefault();
+        askBtn.click();
+      }
     });
   </script>
 </body>
